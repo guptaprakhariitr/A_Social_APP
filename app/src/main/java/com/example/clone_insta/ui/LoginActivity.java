@@ -1,4 +1,4 @@
 package com.example.clone_insta.ui;
 
-public class stories {
+public class LoginActivity {
 }
