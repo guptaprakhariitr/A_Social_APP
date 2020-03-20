@@ -67,7 +67,7 @@
         android:layout_marginBottom="20dp"
         android:backgroundTint="#EA007F"
         android:text="Sign Up"
-        android:onClick="signUp"
+        android:onClick="signUpfunc"
         />
 
     <ImageView

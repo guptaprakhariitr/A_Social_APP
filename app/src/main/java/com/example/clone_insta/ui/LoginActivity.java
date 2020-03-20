@@ -19,7 +19,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_layout);
     }
-public void signUp(View view)
+public void signUpfunc(View view)
 {
     Intent intent = new Intent(LoginActivity.this,
             signUp.class);
