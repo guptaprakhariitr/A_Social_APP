@@ -5,13 +5,17 @@
     android:layout_height="match_parent"
     app:layout_constrainedHeight="true"
     android:background="@drawable/back_main"
-
     app:layout_constraintHeight_default="percent">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         >
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/indeterminateBar"
+            />
         <EditText
             android:id="@+id/firstname"
             android:layout_width="match_parent"
