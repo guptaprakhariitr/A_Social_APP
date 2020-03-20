@@ -62,7 +62,9 @@
             android:layout_centerHorizontal="true"
             android:id="@+id/signUpnu"
             android:backgroundTint="#EA007F"
-            android:text="Sign Up" />
+            android:text="Sign Up"
+            android:onClick="createAccount"
+            />
 
         <ImageView
             android:id="@+id/name_instanu"
