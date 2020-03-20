@@ -40,12 +40,33 @@
         android:layout_below="@+id/password"
         android:layout_centerHorizontal="true"
         android:layout_marginStart="20dp"
-
+        android:id="@+id/login"
         android:layout_marginTop="20dp"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="20dp"
         android:backgroundTint="#EA007F"
         android:text="Login" />
+
+    <TextView
+        android:id="@+id/newUser"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/login"
+        android:layout_centerInParent="true"
+        android:text="New User?"
+        android:textAlignment="center"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/newUser"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="20dp"
+         android:id="@+id/signUp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        android:backgroundTint="#EA007F"
+        android:text="Sign Up" />
 
     <ImageView
         android:id="@+id/name_insta"
