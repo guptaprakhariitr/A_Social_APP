@@ -1,5 +1,6 @@
 package com.example.clone_insta.ui;
 import java.lang.Object.*;
+import java.util.Objects;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -46,7 +47,11 @@ public class signUp extends AppCompatActivity {
         prog.setProgress(0);
       final String email_s=email.getText().toString();
       final String pass_s=pass.getText().toString();
-        mAuth.createUserWithEmailAndPassword(email_s, pass_s)
+      String first_s=first.getText().toString();
+        String last_s=last.getText().toString();
+        String country_s=country.getText().toString();
+        if(!(email_s.equals("") || pass_s.equals("") || first_s.equals("") || country_s.equals("")))
+        {mAuth.createUserWithEmailAndPassword(email_s, pass_s)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -61,12 +66,49 @@ public class signUp extends AppCompatActivity {
                             last.setText("");
                             email.setText("");
                             pass.setText("");
+                            sendVerificationEmail();
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w("TAG", "createUserWithEmail:failure", task.getException());
                             Toast.makeText(signUp.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                             prog.setVisibility(View.INVISIBLE);
+                        }
+                    }
+                });
+    }
+    else{
+        Toast.makeText(this,"FILL IN ALL THE FILEDS ",Toast.LENGTH_LONG).show();
+            prog.setVisibility(View.INVISIBLE);
+        }
+    }
+    private void sendVerificationEmail()
+    {
+        FirebaseUser user = mAuth.getCurrentUser();
+
+        user.sendEmailVerification()
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            // email sent
+
+
+                            // after email is sent just logout the user and finish this activity
+                            FirebaseAuth.getInstance().signOut();
+                            startActivity(new Intent(signUp.this, LoginActivity.class));
+                            finish();
+                        }
+                        else
+                        {
+                            // email not sent, so display message and restart the activity or do whatever you wish to do
+
+                            //restart this activity
+                            overridePendingTransition(0, 0);
+                            finish();
+                            overridePendingTransition(0, 0);
+                            startActivity(getIntent());
+
                         }
                     }
                 });
@@ -80,7 +122,8 @@ public class signUp extends AppCompatActivity {
         InputMethodManager inputMethodManager =
                 (InputMethodManager) activity.getSystemService(
                         Activity.INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(
-                activity.getCurrentFocus().getWindowToken(), 0);
-    }
+        if(inputMethodManager != null){
+            inputMethodManager.hideSoftInputFromWindow(
+                Objects.requireNonNull(activity.getCurrentFocus()).getWindowToken(), 0);
+    }}
 }
