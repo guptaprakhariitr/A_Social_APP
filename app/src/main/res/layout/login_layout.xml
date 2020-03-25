@@ -42,6 +42,7 @@
         android:id="@+id/email_id"
         android:hint="Email-id"
         android:layout_margin="7dp"
+
         />
     <EditText
         android:layout_width="match_parent"

@@ -3,6 +3,8 @@ package com.example.clone_insta.ui;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -32,22 +34,49 @@ public class LoginActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_layout);
-        email=findViewById(R.id.email_id);
-        pass=findViewById(R.id.password);
-        login=findViewById(R.id.login);
-        login.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // Perform action on click
-                signUp.hideSoftKeyboard(LoginActivity.this);
+        email = findViewById(R.id.email_id);
+        pass = findViewById(R.id.password);
+        login = findViewById(R.id.login);
+            login.setEnabled(true);
+            login.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    // Perform action on click
+                    signUp.hideSoftKeyboard(LoginActivity.this);
+                    signInFunc();
+                }
+            });
+        email.addTextChangedListener(new TextWatcher() {
 
-               signInFunc();
-            }
-        });
+                                         @Override
+                                         public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                                             if (s.toString().trim().length() == 0) {
+                                                 login.setEnabled(false);
+                                             } else {
+                                                 login.setEnabled(true);
+                                             }
+                                         }
+
+                                         @Override
+                                         public void beforeTextChanged(CharSequence s, int start, int count,
+                                                                       int after) {
+                                             // TODO Auto-generated method stub
+
+                                         }
+
+                                         @Override
+                                         public void afterTextChanged(Editable s) {
+                                             // TODO Auto-generated method stub
+
+                                         }
+
+                                     }
+        );
     }
-
     @Override
     protected void onStart() {
         super.onStart();
+        login.setEnabled(false);
         FirebaseUser user = mAuth.getCurrentUser();
         if(user != null){
            toMainIntent();
@@ -58,6 +87,7 @@ public class LoginActivity extends AppCompatActivity {
     {
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
 startActivity(intent);
+finish();
     }
 public void signUpFunc(View view)
 {
@@ -84,7 +114,10 @@ public void signUpFunc(View view)
                                 Log.d("TAG", "signInWithEmail:success");
                                 FirebaseUser user = mAuth.getCurrentUser();
                                 if(user!=null && user.isEmailVerified()){
-                                toMainIntent();}
+                                    pass.setText("");
+                                    email.setText("");
+                                    toMainIntent();
+                                }
                                 else{
                                     Toast.makeText(LoginActivity.this, "Email May Not Be Verified",
                                             Toast.LENGTH_SHORT).show();

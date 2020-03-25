@@ -6,6 +6,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -27,6 +29,7 @@ import com.google.firebase.auth.FirebaseUser;
 public class signUp extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private ProgressBar prog;
+    Button signup;
     private EditText email,pass,first,last,country;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -40,7 +43,42 @@ public class signUp extends AppCompatActivity {
         country=findViewById(R.id.country);
         prog=findViewById(R.id.indeterminateBar);
         prog.setVisibility(View.INVISIBLE);
+        signup=findViewById(R.id.signUpnu);
+        email.addTextChangedListener(new TextWatcher() {
+
+                                         @Override
+                                         public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                                             if (s.toString().trim().length() == 0) {
+                                                 signup.setEnabled(false);
+                                             } else {
+                                                 signup.setEnabled(true);
+                                             }
+                                         }
+
+                                         @Override
+                                         public void beforeTextChanged(CharSequence s, int start, int count,
+                                                                       int after) {
+                                             // TODO Auto-generated method stub
+
+                                         }
+
+                                         @Override
+                                         public void afterTextChanged(Editable s) {
+                                             // TODO Auto-generated method stub
+
+                                         }
+
+                                     }
+        );
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        signup.setEnabled(false);
+    }
+
     public void createAccount(View view)
     {prog.setVisibility(View.VISIBLE);
         hideSoftKeyboard(this);
@@ -92,8 +130,6 @@ public class signUp extends AppCompatActivity {
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             // email sent
-
-
                             // after email is sent just logout the user and finish this activity
                             FirebaseAuth.getInstance().signOut();
                             startActivity(new Intent(signUp.this, LoginActivity.class));
