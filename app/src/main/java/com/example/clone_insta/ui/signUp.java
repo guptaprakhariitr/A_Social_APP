@@ -116,6 +116,7 @@ public class signUp extends AppCompatActivity {
                             my2.child(uid).child("first").setValue(first_s);
                             my2.child(uid).child("last").setValue(last_s);
                             my2.child(uid).child("country").setValue(country_s);
+                            my2.child(uid).child("urlImage").setValue("");
                             country.setText("");
                             first.setText("");
                             last.setText("");
