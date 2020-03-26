@@ -21,20 +21,30 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.clone_insta.R;
+import com.example.clone_insta.user;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 public class signUp extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private ProgressBar prog;
+    String uid;
     Button signup;
+    FirebaseDatabase database;
+    DatabaseReference myRef;
     private EditText email,pass,first,last,country;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         mAuth = FirebaseAuth.getInstance();
         super.onCreate(savedInstanceState);
+        myRef=FirebaseDatabase.getInstance("https://cloneinsta-5f275.firebaseio.com/").getReference();
+      myRef.child("hello").setValue("emial");
         setContentView(R.layout.fragment_new_user);
         email=findViewById(R.id.email_idnu);
         pass=findViewById(R.id.passwordnu);
@@ -78,18 +88,20 @@ public class signUp extends AppCompatActivity {
         super.onStart();
         signup.setEnabled(false);
     }
-
     public void createAccount(View view)
     {prog.setVisibility(View.VISIBLE);
         hideSoftKeyboard(this);
         prog.setProgress(0);
-      final String email_s=email.getText().toString();
+        final String email_s=email.getText().toString();
       final String pass_s=pass.getText().toString();
-      String first_s=first.getText().toString();
-        String last_s=last.getText().toString();
-        String country_s=country.getText().toString();
+      final String first_s=first.getText().toString();
+        final String last_s=last.getText().toString();
+        final String country_s=country.getText().toString();
+        final DatabaseReference my2=myRef.child("user");
+
         if(!(email_s.equals("") || pass_s.equals("") || first_s.equals("") || country_s.equals("")))
-        {mAuth.createUserWithEmailAndPassword(email_s, pass_s)
+        {
+            mAuth.createUserWithEmailAndPassword(email_s, pass_s)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -99,12 +111,18 @@ public class signUp extends AppCompatActivity {
                             FirebaseUser user = mAuth.getCurrentUser();
                             Toast.makeText(signUp.this,"SUCCESS",Toast.LENGTH_SHORT).show();
                             prog.setVisibility(View.INVISIBLE);
+                          uid=user.getUid();
+                            my2.child(uid).child("email").setValue(email_s);
+                            my2.child(uid).child("first").setValue(first_s);
+                            my2.child(uid).child("last").setValue(last_s);
+                            my2.child(uid).child("country").setValue(country_s);
                             country.setText("");
                             first.setText("");
                             last.setText("");
                             email.setText("");
                             pass.setText("");
                             sendVerificationEmail();
+
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w("TAG", "createUserWithEmail:failure", task.getException());
@@ -123,36 +141,39 @@ public class signUp extends AppCompatActivity {
     private void sendVerificationEmail()
     {
         FirebaseUser user = mAuth.getCurrentUser();
-
-        user.sendEmailVerification()
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            // email sent
-                            // after email is sent just logout the user and finish this activity
-                            FirebaseAuth.getInstance().signOut();
-                            startActivity(new Intent(signUp.this, LoginActivity.class));
-                            finish();
+        if(user!=null) {
+            user.sendEmailVerification()
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                // email sent
+                                // after email is sent just logout the user and finish this activity
+                                FirebaseAuth.getInstance().signOut();
+                                startActivity(new Intent(signUp.this, LoginActivity.class));
+                                finish();
+                            } else {
+                                // email not sent, so display message and restart the activity or do whatever you wish to do
+                                Toast.makeText(signUp.this, "Failed to send Email verification", Toast.LENGTH_SHORT).show();
+                                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                                user.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        Toast.makeText(signUp.this, "User Deleted", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                                startActivity(new Intent(signUp.this, LoginActivity.class));
+                                finish();
+                            }
                         }
-                        else
-                        {
-                            // email not sent, so display message and restart the activity or do whatever you wish to do
-
-                            //restart this activity
-                            overridePendingTransition(0, 0);
-                            finish();
-                            overridePendingTransition(0, 0);
-                            startActivity(getIntent());
-
-                        }
-                    }
-                });
-    }
-    private void updateUI(FirebaseUser user){
-        prog.setVisibility(View.INVISIBLE);
-        Intent intent = new Intent(getBaseContext(),LoginActivity.class);
-        startActivity(intent);
+                    });
+        }
+        else
+        {                                        Toast.makeText(signUp.this, "Error Occurred", Toast.LENGTH_SHORT).show();
+            FirebaseAuth.getInstance().signOut();
+            startActivity(new Intent(signUp.this, LoginActivity.class));
+            finish();
+        }
     }
     public static void hideSoftKeyboard(Activity activity) {
         InputMethodManager inputMethodManager =
