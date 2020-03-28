@@ -19,10 +19,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
-
 import com.bumptech.glide.Glide;
-import com.example.clone_insta.MainActivity;
 import com.example.clone_insta.R;
 import com.example.clone_insta.ui.LoginActivity;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -38,10 +35,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-
 import java.io.IOException;
-import java.util.UUID;
-
 import static android.app.Activity.RESULT_OK;
 
 public class profileFragment extends Fragment {
@@ -90,7 +84,7 @@ public class profileFragment extends Fragment {
         progressBar=getView().findViewById(R.id.profile_progress);
         uid=user.getUid();
         uploaddone=getView().findViewById(R.id.upload_done);
-        progressBar.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
         upload=getView().findViewById(R.id.upload_dp);
         profile=getView().findViewById(R.id.profile_pic);
         signout=getView().findViewById(R.id.signout);
@@ -153,6 +147,7 @@ public class profileFragment extends Fragment {
                {
                    profile.setImageResource(R.drawable.noimage);
                }
+            progressBar.setVisibility(View.INVISIBLE);
             }
 
             @Override

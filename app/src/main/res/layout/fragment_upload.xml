@@ -7,7 +7,11 @@
     tools:context=".ui.upload.uploadFragment"
     android:orientation="vertical"
     >
-
+<ProgressBar
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/progressbar"
+    />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -46,6 +50,22 @@
             android:id="@+id/upload_camera"
             />
     </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="#FF4197">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:hint="CAPTION Here"
+            android:textStyle="bold|italic"
+            android:id="@+id/caption"
+            />
+    </ScrollView>
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
