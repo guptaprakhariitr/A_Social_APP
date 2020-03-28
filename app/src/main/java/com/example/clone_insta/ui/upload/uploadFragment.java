@@ -45,6 +45,7 @@ public class uploadFragment extends Fragment {
     EditText caption;
     ImageView upload_image;
     String url2;
+    public String key;
     FirebaseUser user;
     StorageReference storageReference;
     FirebaseStorage storage;
@@ -56,7 +57,7 @@ public class uploadFragment extends Fragment {
     private DatabaseReference myRef;
     ProgressBar progressBar;
     private uploadViewModel homeViewModel;
-
+    private static final int CAMERA_REQUEST_CODE=1;
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         mAuth = FirebaseAuth.getInstance();
@@ -86,6 +87,8 @@ public class uploadFragment extends Fragment {
         progressBar = getView().findViewById(R.id.progressbar);
         storage = FirebaseStorage.getInstance("gs://cloneinsta-5f275.appspot.com");
         storageReference = storage.getReference();
+        myRef=FirebaseDatabase.getInstance("https://cloneinsta-5f275.firebaseio.com/").getReference("user");
+             key=myRef.push().getKey();
         gallery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)
@@ -99,6 +102,16 @@ public class uploadFragment extends Fragment {
             public void onClick(View v)
             {
                 uploadconfig();
+            }
+        });
+        camera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                    startActivityForResult(intent, CAMERA_REQUEST_CODE);
+                }
             }
         });
     }
@@ -153,6 +166,35 @@ public class uploadFragment extends Fragment {
                 Toast.makeText(getContext(), "Failed", Toast.LENGTH_SHORT).show();
             }
         }
+        else
+        if(requestCode == CAMERA_REQUEST_CODE && resultCode == RESULT_OK){
+
+           filePath = data.getData();
+
+           /*            mSelectImage.setImageURI(mImageUri);
+           CropImage.activity(mImageUri)
+                    .setGuidelines(CropImageView.Guidelines.ON)
+                    .setAspectRatio(1,1)
+                    .start(this);
+        Bitmap mImageUri1 = (Bitmap) data.getExtras().get("data");
+         mSelectImage.setImageBitmap(mImageUri1);
+
+          Toast.makeText(this, "Image saved to:\n" +
+                  data.getExtras().get("data"), Toast.LENGTH_LONG).show();
+*/
+            try {
+                Bitmap bitmap = MediaStore
+                        .Images
+                        .Media
+                        .getBitmap(
+                                getActivity().getContentResolver(),
+                                filePath);
+                upload_image.setImageBitmap(bitmap);
+                uploadImage();
+            } catch (IOException e) {
+                Toast.makeText(getContext(), "Failed", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     // UploadImage method
@@ -167,8 +209,7 @@ public class uploadFragment extends Fragment {
             // Defining the child of storageReference
             final StorageReference ref
                     = storageReference
-                    .child(uid);
-
+                    .child(uid).child(key);
             // adding listeners on upload
             // or failure of image
             ref.putFile(filePath)
@@ -236,7 +277,6 @@ public class uploadFragment extends Fragment {
     public void uploadconfig(){
         myRef=FirebaseDatabase.getInstance("https://cloneinsta-5f275.firebaseio.com/").getReference("user");
         if(url2!=null) {
-            String key=myRef.push().getKey();
             myRef.child(uid).child("posts").child("photo").child(key).setValue(url2);
             if(caption.getText()==null) {
                 myRef.child(uid).child("posts").child("caption").child(key).setValue("");
@@ -251,5 +291,7 @@ public class uploadFragment extends Fragment {
             upload.setEnabled(true);
         }
         progressBar.setVisibility(View.INVISIBLE);
+        myRef=FirebaseDatabase.getInstance("https://cloneinsta-5f275.firebaseio.com/").getReference("user");
+        key=myRef.push().getKey();
     }
 }
