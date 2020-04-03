@@ -3,6 +3,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,7 +20,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
+import com.example.clone_insta.MyAdapter;
 import com.example.clone_insta.R;
 import com.example.clone_insta.ui.LoginActivity;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -36,6 +41,8 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import java.io.IOException;
+import java.util.ArrayList;
+
 import static android.app.Activity.RESULT_OK;
 
 public class profileFragment extends Fragment {
@@ -44,25 +51,31 @@ public class profileFragment extends Fragment {
     Button signout;
     String url2;
     FirebaseUser user;
-
+    RecyclerView recyclerView;
+    MyAdapter recyclerViewAdapter;
+    ArrayList<String> rowsArrayList = new ArrayList<>();
+    ArrayList<String> likesArrayList = new ArrayList<>();
+    ArrayList<String> url_images = new ArrayList<>();
     String urll;
     ImageView profile;
-    Button upload,uploaddone;
+    Button upload, uploaddone;
     StorageReference storageReference;
     FirebaseStorage storage;
     ProgressBar progressBar;
+    boolean isLoading = false;
     private Uri filePath;
     private final int PICK_IMAGE_REQUEST = 22;
     private String uid;
-   private DatabaseReference myRef;
-   private TextView name,email,country;
+    private DatabaseReference myRef;
+    private TextView name, email, country;
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         mAuth = FirebaseAuth.getInstance();
-        myRef= FirebaseDatabase.getInstance("https://cloneinsta-5f275.firebaseio.com/").getReference();
+        myRef = FirebaseDatabase.getInstance("https://cloneinsta-5f275.firebaseio.com/").getReference();
 
         notificationsViewModel =
-               new ViewModelProvider(this).get(profileViewModel.class);
+                new ViewModelProvider(this).get(profileViewModel.class);
         View root = inflater.inflate(R.layout.fragment_profile, container, false);
         notificationsViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
@@ -77,77 +90,77 @@ public class profileFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        user=mAuth.getCurrentUser();
-        name=getView().findViewById(R.id.Name);
-        country=getView().findViewById(R.id.country_profile);
-        email=getView().findViewById(R.id.email_profile);
-        progressBar=getView().findViewById(R.id.profile_progress);
-        uid=user.getUid();
-        uploaddone=getView().findViewById(R.id.upload_done);
+        user = mAuth.getCurrentUser();
+        recyclerView = getView().findViewById(R.id.profile_post);
+        name = getView().findViewById(R.id.Name);
+        country = getView().findViewById(R.id.country_profile);
+        email = getView().findViewById(R.id.email_profile);
+        progressBar = getView().findViewById(R.id.profile_progress);
+        uid = user.getUid();
+        uploaddone = getView().findViewById(R.id.upload_done);
         progressBar.setVisibility(View.VISIBLE);
-        upload=getView().findViewById(R.id.upload_dp);
-        profile=getView().findViewById(R.id.profile_pic);
-        signout=getView().findViewById(R.id.signout);
+        upload = getView().findViewById(R.id.upload_dp);
+        profile = getView().findViewById(R.id.profile_pic);
+        signout = getView().findViewById(R.id.signout);
         storage = FirebaseStorage.getInstance("gs://cloneinsta-5f275.appspot.com");
         storageReference = storage.getReference();
         setdetail();
-        signout.setOnClickListener(new  View.OnClickListener(){
-            public void onClick (View v)
-            {
-                mAuth.getCurrentUser();
-                mAuth.signOut();
-                intent_send_log_in();
-            }
-        }
+        signout.setOnClickListener(new View.OnClickListener() {
+                                       public void onClick(View v) {
+                                           mAuth.getCurrentUser();
+                                           mAuth.signOut();
+                                           intent_send_log_in();
+                                       }
+                                   }
         );
         upload.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
+            public void onClick(View v) {
                 SelectImage();
                 upload.setEnabled(true);
             }
         });
         uploaddone.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
-               uploadconfig();
+            public void onClick(View v) {
+                uploadconfig();
             }
         });
+        populateData();
+        initAdapter();
+        initScrollListener();
     }
 
-    private   void intent_send_log_in(){
+    private void intent_send_log_in() {
         Intent intent = new Intent(getContext(), LoginActivity.class);
         startActivity(intent);
         getActivity().finish();
     }
-    private void setdetail(){
-        user=mAuth.getCurrentUser();
-        uid=user.getUid();
-        myRef=FirebaseDatabase.getInstance("https://cloneinsta-5f275.firebaseio.com/").getReference("user");
+
+    private void setdetail() {
+        user = mAuth.getCurrentUser();
+        uid = user.getUid();
+        myRef = FirebaseDatabase.getInstance("https://cloneinsta-5f275.firebaseio.com/").getReference("user");
         myRef.child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-               // String value = dataSnapshot.getValue(String.class);
-               // demoValue.setText(value);
-                String name2="Name-\n"+dataSnapshot.child("first").getValue(String.class)+" "+dataSnapshot.child("last").getValue(String.class);
+                // String value = dataSnapshot.getValue(String.class);
+                // demoValue.setText(value);
+                String name2 = "Name-\n" + dataSnapshot.child("first").getValue(String.class) + " " + dataSnapshot.child("last").getValue(String.class);
                 name.setText(name2);
-                String country2="Country-"+dataSnapshot.child("country").getValue(String.class);
+                String country2 = "Country-" + dataSnapshot.child("country").getValue(String.class);
                 country.setText(country2);
-                String email2="Email-\n"+dataSnapshot.child("email").getValue(String.class);
+                String email2 = "Email-\n" + dataSnapshot.child("email").getValue(String.class);
                 email.setText(email2);
-                urll= dataSnapshot.child("urlImage").getValue(String.class);
-               if(!urll.equals("")){
-                Glide.with(getContext())
-                        .load(urll)
-                        .into(profile);
-               }
-               else
-               {
-                   profile.setImageResource(R.drawable.noimage);
-               }
-            progressBar.setVisibility(View.INVISIBLE);
+                urll = dataSnapshot.child("urlImage").getValue(String.class);
+                if (!urll.equals("")) {
+                    Glide.with(getContext())
+                            .load(urll)
+                            .into(profile);
+                } else {
+                    profile.setImageResource(R.drawable.noimage);
+                }
+                progressBar.setVisibility(View.INVISIBLE);
             }
 
             @Override
@@ -157,8 +170,7 @@ public class profileFragment extends Fragment {
     }
 
     // Select Image method
-    private void SelectImage()
-    {
+    private void SelectImage() {
 
         // Defining Implicit Intent to mobile gallery
         Intent intent = new Intent();
@@ -170,10 +182,11 @@ public class profileFragment extends Fragment {
                         "Select Image from here..."),
                 PICK_IMAGE_REQUEST);
     }
+
     @Override
     public void onActivityResult(int requestCode,
-                                    int resultCode,
-                                    Intent data) {
+                                 int resultCode,
+                                 Intent data) {
 
         super.onActivityResult(requestCode,
                 resultCode,
@@ -202,23 +215,21 @@ public class profileFragment extends Fragment {
                                 filePath);
                 profile.setImageBitmap(bitmap);
                 uploadImage();
+            } catch (IOException e) {
+                Toast.makeText(getContext(), "Failed", Toast.LENGTH_SHORT).show();
             }
-        catch (IOException e)
-        {
-            Toast.makeText(getContext(),"Failed",Toast.LENGTH_SHORT).show();
-        }
         }
     }
+
     // UploadImage method
-    private void uploadImage()
-    {
+    private void uploadImage() {
         if (filePath != null) {
             progressBar.setVisibility(View.VISIBLE);
             // Code for showing progressDialog while uploading
             upload.setEnabled(false);
             progressBar.setVisibility(View.VISIBLE);
-            user=mAuth.getCurrentUser();
-            uid=user.getUid();
+            user = mAuth.getCurrentUser();
+            uid = user.getUid();
             // Defining the child of storageReference
             final StorageReference ref
                     = storageReference
@@ -231,21 +242,20 @@ public class profileFragment extends Fragment {
                             new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                 @Override
                                 public void onSuccess(
-                                        UploadTask.TaskSnapshot taskSnapshot)
-                                {
+                                        UploadTask.TaskSnapshot taskSnapshot) {
                                     // Image uploaded successfully
-                                   ref.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                       @Override
-                                       public void onSuccess(Uri uri) {
-                                           //Do what you want with the url
-                                            url2=String.valueOf(uri);
+                                    ref.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                                                                  @Override
+                                                                                  public void onSuccess(Uri uri) {
+                                                                                      //Do what you want with the url
+                                                                                      url2 = String.valueOf(uri);
 
-                                           Log.i("Tag",url2);
-                                       }
-                                   }
-                                   );
+                                                                                      Log.i("Tag", url2);
+                                                                                  }
+                                                                              }
+                                    );
                                     // Dismiss dialog
-                                    uid=user.getUid();
+                                    uid = user.getUid();
 
                                     progressBar.setVisibility(View.INVISIBLE);
                                     Toast
@@ -260,8 +270,7 @@ public class profileFragment extends Fragment {
 
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
-                        public void onFailure(@NonNull Exception e)
-                        {
+                        public void onFailure(@NonNull Exception e) {
 
                             // Error, Image not uploaded
                             progressBar.setVisibility(View.INVISIBLE);
@@ -279,35 +288,177 @@ public class profileFragment extends Fragment {
                                 // percentage on the dialog box
                                 @Override
                                 public void onProgress(
-                                        UploadTask.TaskSnapshot taskSnapshot)
-                                {
+                                        UploadTask.TaskSnapshot taskSnapshot) {
                                     double progress
                                             = (100.0
                                             * taskSnapshot.getBytesTransferred()
                                             / taskSnapshot.getTotalByteCount());
-                                    Toast.makeText(getContext(),"Working",Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getContext(), "Working", Toast.LENGTH_SHORT).show();
                                 }
                             });
         }
 
-        myRef=FirebaseDatabase.getInstance("https://cloneinsta-5f275.firebaseio.com/").getReference("user");
-      if(url2!=null) {
-          myRef.child(uid).child("urlImage").setValue(url2);
-          Glide.with(getContext())
-                  .load(url2)
-                  .into(profile);
-          upload.setEnabled(true);
-      }
-    }
-    public void uploadconfig(){
-        myRef=FirebaseDatabase.getInstance("https://cloneinsta-5f275.firebaseio.com/").getReference("user");
-        if(url2!=null) {
+        myRef = FirebaseDatabase.getInstance("https://cloneinsta-5f275.firebaseio.com/").getReference("user");
+        if (url2 != null) {
             myRef.child(uid).child("urlImage").setValue(url2);
             Glide.with(getContext())
                     .load(url2)
                     .into(profile);
             upload.setEnabled(true);
         }
+    }
+
+    public void uploadconfig() {
+
+        myRef = FirebaseDatabase.getInstance("https://cloneinsta-5f275.firebaseio.com/").getReference("user");
+        if (url2 != null) {
+            myRef.child(uid).child("urlImage").setValue(url2);
+            Glide.with(getContext())
+                    .load(url2)
+                    .into(profile);
+            upload.setEnabled(true);
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    private void populateData() {
+        user = mAuth.getCurrentUser();
+        uid = user.getUid();
+        myRef = FirebaseDatabase.getInstance("https://cloneinsta-5f275.firebaseio.com/").getReference("user").child(uid).child("posts");
+        DatabaseReference ref_cap = myRef.child("caption");
+        DatabaseReference ref_posts = myRef.child("photo");
+        final int[] i = {0,0};
+       {
+            //rowsArrayList.add("Item " + i);
+
+
+        ref_cap.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    rowsArrayList.add(snapshot.getValue().toString());
+                    i[0]++;
+                    if(i[0]==10) {break;}
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+            ref_posts.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        url_images.add(snapshot.getValue().toString());
+                        i[1]++;
+                        if(i[1]==10) {break;}
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                }
+            });
+
+    }
+    }
+
+    private void initAdapter() {
+
+        recyclerViewAdapter = new MyAdapter(rowsArrayList, likesArrayList, url_images);
+        recyclerView.setAdapter(recyclerViewAdapter);
+    }
+
+    private void initScrollListener() {
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+
+                if (!isLoading) {
+                    if (linearLayoutManager != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() == rowsArrayList.size() - 1) {
+                        //bottom of list!
+                        loadMore();
+                        isLoading = true;
+                    }
+                }
+            }
+        });
+    }
+    private void loadMore() {
+        rowsArrayList.add(null);
+
+        recyclerViewAdapter.notifyItemInserted(rowsArrayList.size() - 1);
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+             @Override
+            public void run() {
+                rowsArrayList.remove(rowsArrayList.size() - 1);
+                int scrollPosition = rowsArrayList.size();
+                recyclerViewAdapter.notifyItemRemoved(scrollPosition);
+                int currentSize = scrollPosition;
+                final int nextLimit = currentSize + 10;
+
+               /* while (currentSize - 1 < nextLimit) {
+                    rowsArrayList.add("Item " + currentSize);
+                    currentSize++;
+                }*/
+                 user = mAuth.getCurrentUser();
+                 uid = user.getUid();
+                 myRef = FirebaseDatabase.getInstance("https://cloneinsta-5f275.firebaseio.com/").getReference("user").child(uid).child("posts");
+                 DatabaseReference ref_cap = myRef.child("caption");
+                 DatabaseReference ref_posts = myRef.child("photo");
+                 final int[] i = {currentSize,currentSize};
+                 {
+                     //rowsArrayList.add("Item " + i);
+                     final int finalCurrentSize1 = currentSize;
+                     ref_cap.addListenerForSingleValueEvent(new ValueEventListener() {
+                         @Override
+                         public void onDataChange(DataSnapshot dataSnapshot) {
+                             for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                if(i[0]> finalCurrentSize1)
+                                { rowsArrayList.add(snapshot.getValue().toString());}
+                                 i[0]++;
+                                 if(i[0]==nextLimit) {break;}
+                             }
+                         }
+
+                         @Override
+                         public void onCancelled(DatabaseError databaseError) {
+                         }
+                     });
+                     final int finalCurrentSize = currentSize;
+                     ref_posts.addListenerForSingleValueEvent(new ValueEventListener() {
+                         @Override
+                         public void onDataChange(DataSnapshot dataSnapshot) {
+                             for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                 if(i[1]> finalCurrentSize)
+                                 {   url_images.add(snapshot.getValue().toString());}
+                                 i[1]++;
+                                 if(i[1]==nextLimit) {break;}
+                             }
+                         }
+
+                         @Override
+                         public void onCancelled(DatabaseError databaseError) {
+                         }
+                     });
+
+                 }
+                 currentSize=nextLimit;
+                recyclerViewAdapter.notifyDataSetChanged();
+                isLoading = false;
+            }
+        }, 2000);
     }
 }
 

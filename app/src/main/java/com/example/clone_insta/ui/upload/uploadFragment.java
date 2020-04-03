@@ -269,7 +269,9 @@ private void select_camera_image(){
         if(url2!=null) {
             Log.i("Tag","inner_config");
             myRef.child(uid).child("posts").child("photo").child(key).setValue(url2);
-                String cap=caption.getText().toString();
+            myRef.child(uid).child("posts").child("likes").child(key).child("value").setValue("0");
+            myRef.child(uid).child("posts").child("likes").child(key).child("names").setValue(" ");
+            String cap=caption.getText().toString();
                 if(cap.equals("")) cap="<3";
                 myRef.child(uid).child("posts").child("caption").child(key).setValue(cap);
             Toast.makeText(getContext(),"Uploaded",Toast.LENGTH_SHORT).show();
