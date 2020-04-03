@@ -77,11 +77,11 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@drawable/defaultuploadimageback"
-           android:layout_above="@+id/upload"
+           android:layout_above="@+id/upload_post"
             />
 
         <Button
-            android:id="@+id/upload"
+            android:id="@+id/upload_post"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
            android:layout_above="@+id/M"

@@ -4,42 +4,47 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.profile.profileFragment"
+    android:background="#9A9898"
     android:orientation="vertical"
-    >
+    tools:context=".ui.profile.profileFragment">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:background="#EAD5D5">
+
         <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:id="@+id/profile_progress"
-            />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
         <ImageView
             android:id="@+id/profile_pic"
             android:layout_width="150dp"
             android:layout_height="150dp"
             android:layout_marginStart="30dp"
             android:layout_marginTop="50dp"
-            android:background="#FFFFFF" />
+            android:background="#FFFFFF"
+            android:elevation="50dp"
+            />
+
         <Button
+            android:id="@+id/upload_dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/upload_dp"
             android:layout_below="@+id/profile_pic"
             android:layout_marginLeft="10dp"
-            android:text="Select profile Photo"
-            />
+            android:text="Select profile Photo" />
+
         <Button
+            android:id="@+id/upload_done"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/upload_done"
             android:layout_below="@+id/upload_dp"
             android:text="Upload"
 
             />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -52,26 +57,25 @@
                 android:id="@+id/Name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                />
+                android:layout_margin="4dp" />
 
             <TextView
                 android:id="@+id/country_profile"
-                android:layout_margin="4dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp" />
 
             <TextView
                 android:id="@+id/email_profile"
-                android:layout_margin="4dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-            <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Log Out"
+                android:layout_margin="4dp" />
+
+            <Button
                 android:id="@+id/signout"
-                />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Log Out" />
         </LinearLayout>
     </RelativeLayout>
 
@@ -84,16 +88,12 @@
         android:gravity="center"
         android:text="POSTS"
         android:textSize="30dp" />
-    <ScrollView
+
+    <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        >
-
-        <GridLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/grid_profile_posts"
-
-            />
-    </ScrollView>
+        android:layout_height="match_parent"
+        android:background="#4E4E4E"
+        app:reverseLayout="true"
+        android:id="@+id/profile_post"
+        />
 </LinearLayout>

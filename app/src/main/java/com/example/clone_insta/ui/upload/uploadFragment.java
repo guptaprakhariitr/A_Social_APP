@@ -36,11 +36,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -85,7 +81,7 @@ public class uploadFragment extends Fragment {
         uid = user.getUid();
         gallery = getView().findViewById(R.id.upload_gallery);
         camera = getView().findViewById(R.id.upload_camera);
-        upload = getView().findViewById(R.id.upload);
+        upload = getView().findViewById(R.id.upload_post);
         caption = getView().findViewById(R.id.caption);
         progressBar.setVisibility(View.INVISIBLE);
         upload_image = getView().findViewById(R.id.image_uploaded);
@@ -102,7 +98,7 @@ public class uploadFragment extends Fragment {
                SelectImage();
             }
         });
-        upload_image.setOnClickListener(new View.OnClickListener() {
+        upload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)
             {
@@ -181,49 +177,9 @@ private void select_camera_image(){
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
             upload_image.setImageBitmap(imageBitmap);
-            FileOutputStream fileOutputStream=null;
-            File file=getdisc();
-            if (!file.exists() && !file.mkdirs())
-            {
-                Toast.makeText(getContext(),"sorry can not make dir",Toast.LENGTH_LONG).show();
-                return;
-            }
-            SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyymmsshhmmss");
-            String date=simpleDateFormat.format(new Date());
-            String name="img"+date+".jpeg";
-            String file_name=file.getAbsolutePath()+"/"+name; File new_file=new File(file_name);
-            try {
-                fileOutputStream =new FileOutputStream(new_file);
-                Bitmap bitmap=viewToBitmap(upload_image,upload_image.getWidth(),upload_image.getHeight());
-                bitmap.compress(Bitmap.CompressFormat.JPEG,100,fileOutputStream);
-                Toast.makeText(getContext(),"Success", Toast.LENGTH_LONG).show();
-                fileOutputStream.flush();
-                fileOutputStream.close();
-            }
-            catch
-            (FileNotFoundException e) {
-
-            } catch (IOException e) {
-
-            }
-            refreshGallary(file);
             MediaStore.Images.Media.insertImage(getContext().getContentResolver(), imageBitmap, key , "insta_clone_post");
             SelectImage();
         }
-    }
-    private void refreshGallary(File file)
-    { Intent i=new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        i.setData(Uri.fromFile(file)); getContext().sendBroadcast(i);
-    }
-    private static Bitmap viewToBitmap(View view, int widh, int hight)
-    {Log.i("tag","HellloHere");
-        Bitmap bitmap=Bitmap.createBitmap(widh,hight, Bitmap.Config.ARGB_8888);
-        Canvas canvas=new Canvas(bitmap); view.draw(canvas);
-        return bitmap;
-    }
-    private File getdisc(){
-        File file= getContext().getDir(Environment.DIRECTORY_DCIM, Context.MODE_PRIVATE);
-        return new File(file,"Clone");
     }
     @Override
     public void onResume() {
@@ -301,20 +257,25 @@ private void select_camera_image(){
                                             = (100.0
                                             * taskSnapshot.getBytesTransferred()
                                             / taskSnapshot.getTotalByteCount());
-                                    Toast.makeText(getContext(), "Working", Toast.LENGTH_SHORT).show();
+                                   // Toast.makeText(getContext(), "Working", Toast.LENGTH_SHORT).show();
                                 }
                             });
         }
 
     }
-    public void uploadconfig(){
+    private void uploadconfig(){
         myRef=FirebaseDatabase.getInstance("https://cloneinsta-5f275.firebaseio.com/").getReference("user");
+        Log.i("Tag","in_config");
         if(url2!=null) {
+            Log.i("Tag","inner_config");
             myRef.child(uid).child("posts").child("photo").child(key).setValue(url2);
                 String cap=caption.getText().toString();
                 if(cap.equals("")) cap="<3";
                 myRef.child(uid).child("posts").child("caption").child(key).setValue(cap);
             Toast.makeText(getContext(),"Uploaded",Toast.LENGTH_SHORT).show();
+        url2=null;
+        upload_image.setImageResource(android.R.color.transparent);
+        caption.setText("");
         }
         progressBar.setVisibility(View.INVISIBLE);
         myRef=FirebaseDatabase.getInstance("https://cloneinsta-5f275.firebaseio.com/").getReference("user");
