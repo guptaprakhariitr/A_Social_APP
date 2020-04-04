@@ -1,6 +1,7 @@
 package com.example.clone_insta;
 
 import android.media.Image;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,38 +15,40 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final int VIEW_TYPE_ITEM = 0;
     private final int VIEW_TYPE_LOADING = 1;
+    public ArrayList<String> mItemList;
+  //  public List<String> mLikeList;
+    public ArrayList<String> mImageUrlList;
 
-    public List<String> mItemList;
-    public List<String> mLikeList;
-    public List<String> mImageUrlList;
-
-    public MyAdapter(List<String> itemList, List<String> likeList, List<String> imageUrlList) {
+    public MyAdapter(ArrayList<String> itemList, ArrayList<String> imageUrlList) {
         mItemList = itemList;
-        mLikeList = likeList;
         mImageUrlList = imageUrlList;
+        Log.i("Tag_in","here1"+itemList.size());
     }
 
-    private class ItemViewHolder extends RecyclerView.ViewHolder {
-
+    private static class ItemViewHolder extends RecyclerView.ViewHolder {
         TextView tvItem, likes_count;
         Button like_it;
         ImageView post_image;
 
         public ItemViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvItem = itemView.findViewById(R.id.caption);
-            likes_count = itemView.findViewById(R.id.like_count);
+            Log.i("Tag_in","here2");
+
+            tvItem = itemView.findViewById(R.id.post_caption);
+           // likes_count = itemView.findViewById(R.id.like_count);
             like_it = itemView.findViewById(R.id.like_button);
             post_image = itemView.findViewById(R.id.post_pic);
+
         }
     }
 
-    private class LoadingViewHolder extends RecyclerView.ViewHolder {
+    private static class LoadingViewHolder extends RecyclerView.ViewHolder {
 
         ProgressBar progressBar;
 
@@ -54,10 +57,11 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             progressBar = itemView.findViewById(R.id.progressBar);
         }
     }
-
+    @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                       int viewType) {
+        Log.i("Tag_in","here3");
         if (viewType == VIEW_TYPE_ITEM) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_recycler, parent, false);
             return new ItemViewHolder(view);
@@ -67,11 +71,11 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
     }
-
+    @NonNull
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, final int position) {
+        Log.i("Tag_in","here4");
         if (viewHolder instanceof ItemViewHolder) {
-
             populateItemRows((ItemViewHolder) viewHolder, position);
         } else if (viewHolder instanceof LoadingViewHolder) {
             showLoadingView((LoadingViewHolder) viewHolder, position);
@@ -80,13 +84,14 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return mItemList == null ? 0 : mItemList.size();
+        Log.i("Tag_in","hello7");
+        Log.i("Tag_in"," "+mItemList.size());
+        return mItemList.size();
 
     }
-
     @Override
     public int getItemViewType(int position) {
-        return mItemList.get(position) == null ? VIEW_TYPE_LOADING : VIEW_TYPE_ITEM;
+        return mItemList.get(position) == null? VIEW_TYPE_LOADING : VIEW_TYPE_ITEM;
     }
 
     private void showLoadingView(LoadingViewHolder viewHolder, int position) {
@@ -94,11 +99,14 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     private void populateItemRows(ItemViewHolder viewHolder, int position) {
+        Log.i("Tag_in","here5");
         String item = mItemList.get(position);
+        Log.i("Tag_in",item);
         viewHolder.tvItem.setText(item);
         String urll = mImageUrlList.get(position);
+        Log.i("Tag_in",urll);
         if (!urll.equals("")) {
-            Glide.with(viewHolder.itemView.getContext())
+            Glide.with(viewHolder.tvItem.getContext())
                     .load(urll)
                     .into(viewHolder.post_image);
         } else {

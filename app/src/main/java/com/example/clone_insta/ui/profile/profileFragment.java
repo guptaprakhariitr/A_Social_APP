@@ -47,15 +47,19 @@ import static android.app.Activity.RESULT_OK;
 
 public class profileFragment extends Fragment {
     private FirebaseAuth mAuth;
+    Boolean isloaded_cap=false,isloaded_url=false;
     private profileViewModel notificationsViewModel;
+    private RecyclerView.LayoutManager layoutManager;
     Button signout;
     String url2;
     FirebaseUser user;
     RecyclerView recyclerView;
     MyAdapter recyclerViewAdapter;
-    ArrayList<String> rowsArrayList = new ArrayList<>();
-    ArrayList<String> likesArrayList = new ArrayList<>();
-    ArrayList<String> url_images = new ArrayList<>();
+    Button refresh;
+    private static  ArrayList<String> rowsArrayList ;
+    //ArrayList<String> likesArrayList = new ArrayList<>();
+    private static ArrayList<String> url_images;
+    private static  ArrayList<String> rowsArrayList_copy = new ArrayList<>();
     String urll;
     ImageView profile;
     Button upload, uploaddone;
@@ -72,8 +76,9 @@ public class profileFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         mAuth = FirebaseAuth.getInstance();
+        rowsArrayList = new ArrayList<>();
+        url_images = new ArrayList<>();
         myRef = FirebaseDatabase.getInstance("https://cloneinsta-5f275.firebaseio.com/").getReference();
-
         notificationsViewModel =
                 new ViewModelProvider(this).get(profileViewModel.class);
         View root = inflater.inflate(R.layout.fragment_profile, container, false);
@@ -91,7 +96,7 @@ public class profileFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         user = mAuth.getCurrentUser();
-        recyclerView = getView().findViewById(R.id.profile_post);
+        recyclerView = getView().findViewById(R.id.profile_post_recycler);
         name = getView().findViewById(R.id.Name);
         country = getView().findViewById(R.id.country_profile);
         email = getView().findViewById(R.id.email_profile);
@@ -102,6 +107,9 @@ public class profileFragment extends Fragment {
         upload = getView().findViewById(R.id.upload_dp);
         profile = getView().findViewById(R.id.profile_pic);
         signout = getView().findViewById(R.id.signout);
+        refresh=getView().findViewById(R.id.refresh);
+        layoutManager = new LinearLayoutManager(getContext());
+        recyclerView.setLayoutManager(layoutManager);
         storage = FirebaseStorage.getInstance("gs://cloneinsta-5f275.appspot.com");
         storageReference = storage.getReference();
         setdetail();
@@ -120,6 +128,13 @@ public class profileFragment extends Fragment {
                 upload.setEnabled(true);
             }
         });
+        refresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                initAdapter();
+                Log.i("Tag_in","     imp     "+rowsArrayList.size());
+            }
+        });
         uploaddone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -127,8 +142,18 @@ public class profileFragment extends Fragment {
             }
         });
         populateData();
-        initAdapter();
-        initScrollListener();
+        Log.i("Tag_in","     imp     "+rowsArrayList_copy.size());
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+            initAdapter();
+            Log.i("Tag_in","     imp     "+rowsArrayList.size());
+            //        initScrollListener();
+
     }
 
     private void intent_send_log_in() {
@@ -328,20 +353,29 @@ public class profileFragment extends Fragment {
         DatabaseReference ref_cap = myRef.child("caption");
         DatabaseReference ref_posts = myRef.child("photo");
         final int[] i = {0,0};
-       {
+
             //rowsArrayList.add("Item " + i);
-
-
         ref_cap.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    rowsArrayList.add(snapshot.getValue().toString());
+                    if(!(snapshot.getValue().toString().equals("")))
+                    { rowsArrayList.add(snapshot.getValue().toString());
+                    Log.i("Tag",snapshot.getValue().toString()+"     "+rowsArrayList.size());
                     i[0]++;
-                    if(i[0]==10) {break;}
+                    if(i[0]==10) {break;}}
                 }
+                Log.i("Tag","   out  "+rowsArrayList.size());
+                rowsArrayList_copy=rowsArrayList;
+                assignment(rowsArrayList);
+                isloaded_cap=true;
             }
-
+        public void assignment(ArrayList<String> arrayList)
+        {
+            Log.i("Tag","   out_-  "+arrayList.size());
+            rowsArrayList_copy=arrayList;
+            Log.i("Tag","   out  "+rowsArrayList_copy.size());
+        }
             @Override
             public void onCancelled(DatabaseError databaseError) {
             }
@@ -349,11 +383,13 @@ public class profileFragment extends Fragment {
             ref_posts.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        url_images.add(snapshot.getValue().toString());
+                    for (DataSnapshot snapshot2 : dataSnapshot.getChildren()) {
+                        url_images.add(snapshot2.getValue().toString());
+                        Log.i("Tag",snapshot2.getValue().toString());
                         i[1]++;
                         if(i[1]==10) {break;}
                     }
+                isloaded_url=true;
                 }
 
                 @Override
@@ -362,12 +398,13 @@ public class profileFragment extends Fragment {
             });
 
     }
-    }
+
 
     private void initAdapter() {
-
-        recyclerViewAdapter = new MyAdapter(rowsArrayList, likesArrayList, url_images);
+        Log.i("Tag_out"," "+rowsArrayList.size());
+        recyclerViewAdapter = new MyAdapter(rowsArrayList, url_images);
         recyclerView.setAdapter(recyclerViewAdapter);
+        recyclerViewAdapter.notifyDataSetChanged();
     }
 
     private void initScrollListener() {
@@ -396,7 +433,6 @@ public class profileFragment extends Fragment {
     }
     private void loadMore() {
         rowsArrayList.add(null);
-
         recyclerViewAdapter.notifyItemInserted(rowsArrayList.size() - 1);
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
