@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import static android.app.Activity.RESULT_OK;
 
 public class profileFragment extends Fragment {
+    ArrayList<String > names=new ArrayList<>();
     private FirebaseAuth mAuth;
     Boolean isloaded_cap=false,isloaded_url=false;
     private profileViewModel notificationsViewModel;
@@ -133,6 +134,7 @@ public class profileFragment extends Fragment {
             public void onClick(View v) {
                 initAdapter();
                 Log.i("Tag_in","     imp     "+rowsArrayList.size());
+                initScrollListener();
             }
         });
         uploaddone.setOnClickListener(new View.OnClickListener() {
@@ -349,11 +351,11 @@ public class profileFragment extends Fragment {
     private void populateData() {
         user = mAuth.getCurrentUser();
         uid = user.getUid();
-        myRef = FirebaseDatabase.getInstance("https://cloneinsta-5f275.firebaseio.com/").getReference("user").child(uid).child("posts");
-        DatabaseReference ref_cap = myRef.child("caption");
-        DatabaseReference ref_posts = myRef.child("photo");
+        myRef = FirebaseDatabase.getInstance("https://cloneinsta-5f275.firebaseio.com/").getReference("user").child(uid);
+        final DatabaseReference ref_names=myRef.child("first");
+        DatabaseReference ref_cap = myRef.child("posts").child("caption");
+        DatabaseReference ref_posts = myRef.child("posts").child("photo");
         final int[] i = {0,0};
-
             //rowsArrayList.add("Item " + i);
         ref_cap.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -367,15 +369,8 @@ public class profileFragment extends Fragment {
                 }
                 Log.i("Tag","   out  "+rowsArrayList.size());
                 rowsArrayList_copy=rowsArrayList;
-                assignment(rowsArrayList);
                 isloaded_cap=true;
             }
-        public void assignment(ArrayList<String> arrayList)
-        {
-            Log.i("Tag","   out_-  "+arrayList.size());
-            rowsArrayList_copy=arrayList;
-            Log.i("Tag","   out  "+rowsArrayList_copy.size());
-        }
             @Override
             public void onCancelled(DatabaseError databaseError) {
             }
@@ -387,6 +382,18 @@ public class profileFragment extends Fragment {
                         url_images.add(snapshot2.getValue().toString());
                         Log.i("Tag",snapshot2.getValue().toString());
                         i[1]++;
+                        ref_names.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                    names.add(dataSnapshot.getValue(String.class));
+                                    Log.i("Tag",dataSnapshot.getValue().toString());
+                                isloaded_url=true;
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                            }
+                        });
                         if(i[1]==10) {break;}
                     }
                 isloaded_url=true;
@@ -397,12 +404,13 @@ public class profileFragment extends Fragment {
                 }
             });
 
+
     }
 
 
     private void initAdapter() {
         Log.i("Tag_out"," "+rowsArrayList.size());
-        recyclerViewAdapter = new MyAdapter(rowsArrayList, url_images);
+        recyclerViewAdapter = new MyAdapter(rowsArrayList, url_images,names);
         recyclerView.setAdapter(recyclerViewAdapter);
         recyclerViewAdapter.notifyDataSetChanged();
     }

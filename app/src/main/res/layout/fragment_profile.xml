@@ -91,11 +91,11 @@
         />
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/profile_post_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#4E4E4E"
-        android:id="@+id/profile_post_recycler"
-        />
+        app:reverseLayout="true"
+        android:background="@drawable/refreshback" />
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

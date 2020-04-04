@@ -3,13 +3,22 @@
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:layout_margin="15dp"
     >
-<ImageView
+
+    <TextView
+        android:id="@+id/post_uploader"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="#F9F2FA"
+        android:fontFamily="@font/abel"
+        android:textColor="#191718"
+        android:textSize="20sp" />
+    <ImageView
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/post_pic"
     />
-
     <TextView
         android:id="@+id/post_caption"
         android:layout_width="match_parent"

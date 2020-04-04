@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.feed.feedFragment">
+    tools:context=".ui.feed.feedFragment"
+    android:orientation="vertical"
+    >
 
     <TextView
         android:id="@+id/text_dashboard"
@@ -19,17 +21,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <fragment
-        android:id="@+id/fragment"
-        android:name="com.example.clone_insta.ui.stories.fragmentStories"
-        android:layout_width="0dp"
+    <Button
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_chainStyle="spread_inside"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed"
-        app:layout_constraintVertical_weight="@android:integer/config_mediumAnimTime" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_gravity="center"
+        android:background="#FD71A1"
+        android:gravity="center"
+        android:text="POSTS(click here to refresh)"
+        android:textSize="22dp"
+        android:id="@+id/refresh_feed"
+        />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/profile_post_recycler_feed"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/refreshback" />
+</LinearLayout>

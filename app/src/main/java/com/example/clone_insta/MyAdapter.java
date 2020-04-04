@@ -22,24 +22,25 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final int VIEW_TYPE_ITEM = 0;
     private final int VIEW_TYPE_LOADING = 1;
     public ArrayList<String> mItemList;
-  //  public List<String> mLikeList;
+  public List<String> mnameList;
     public ArrayList<String> mImageUrlList;
 
-    public MyAdapter(ArrayList<String> itemList, ArrayList<String> imageUrlList) {
+    public MyAdapter(ArrayList<String> itemList, ArrayList<String> imageUrlList,ArrayList<String> names) {
         mItemList = itemList;
+        mnameList=names;
         mImageUrlList = imageUrlList;
         Log.i("Tag_in","here1"+itemList.size());
     }
 
     private static class ItemViewHolder extends RecyclerView.ViewHolder {
-        TextView tvItem, likes_count;
+        TextView tvItem, namesC;
         Button like_it;
         ImageView post_image;
 
         public ItemViewHolder(@NonNull View itemView) {
             super(itemView);
             Log.i("Tag_in","here2");
-
+            namesC=itemView.findViewById(R.id.post_uploader);
             tvItem = itemView.findViewById(R.id.post_caption);
            // likes_count = itemView.findViewById(R.id.like_count);
             like_it = itemView.findViewById(R.id.like_button);
@@ -86,7 +87,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public int getItemCount() {
         Log.i("Tag_in","hello7");
         Log.i("Tag_in"," "+mItemList.size());
-        return mItemList.size();
+        return mnameList.size();
 
     }
     @Override
@@ -111,6 +112,17 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     .into(viewHolder.post_image);
         } else {
             viewHolder.post_image.setImageResource(R.drawable.noimage);
+        }
+        String name;
+        try {
+             name=mnameList.get(position);
+        if(name!=null) {
+            viewHolder.namesC.setText("Uploaded by "+name);
+
+        }
+        }
+        catch (ArrayIndexOutOfBoundsException r){
+            name="------";
         }
     }
 }
