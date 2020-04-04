@@ -89,6 +89,7 @@ public class feedFragment extends Fragment {
         refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                recyclerView.setBackgroundResource(android.R.color.transparent);
                 initAdapter();
                 Log.i("Tag_in","     imp     "+rowsArrayList.size());
             }

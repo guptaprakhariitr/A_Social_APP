@@ -1,10 +1,13 @@
 package com.example.clone_insta.ui.upload;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -20,10 +23,16 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+
+import com.example.clone_insta.MainActivity;
 import com.example.clone_insta.R;
+import com.example.clone_insta.ui.LoginActivity;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -85,7 +94,32 @@ public class uploadFragment extends Fragment {
         caption = getView().findViewById(R.id.caption);
         progressBar.setVisibility(View.INVISIBLE);
         upload_image = getView().findViewById(R.id.image_uploaded);
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
 
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 400
+            );
+            FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
+            if (Build.VERSION.SDK_INT >= 26) {
+                ft.setReorderingAllowed(false);
+            }
+            ft.detach(this).attach(this).commit();
+        }
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{Manifest.permission.CAMERA}, 400
+            );
+        }
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 400
+            );
+        }
         storage = FirebaseStorage.getInstance("gs://cloneinsta-5f275.appspot.com");
         storageReference = storage.getReference();
         myRef=FirebaseDatabase.getInstance("https://cloneinsta-5f275.firebaseio.com/").getReference("user");
@@ -115,6 +149,14 @@ public class uploadFragment extends Fragment {
         });
     }
 private void select_camera_image(){
+    if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            != PackageManager.PERMISSION_GRANTED) {
+
+        ActivityCompat.requestPermissions(getActivity(),
+                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 400
+        );
+    }
+
     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
     if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
         startActivityForResult(intent, CAMERA_REQUEST_CODE);
@@ -178,6 +220,8 @@ private void select_camera_image(){
             Bitmap imageBitmap = (Bitmap) extras.get("data");
             upload_image.setImageBitmap(imageBitmap);
             MediaStore.Images.Media.insertImage(getContext().getContentResolver(), imageBitmap, key , "insta_clone_post");
+            Toast.makeText(getContext(),"SELECT THE CLICKED IMAGE FROM GALLERY",Toast.LENGTH_LONG).show();
+            upload_image.setImageResource(android.R.color.transparent);
             SelectImage();
         }
     }
@@ -224,8 +268,8 @@ private void select_camera_image(){
                                     progressBar.setVisibility(View.INVISIBLE);
                                     Toast
                                             .makeText(getContext(),
-                                                    "Image Selected!!",
-                                                    Toast.LENGTH_SHORT)
+                                                    "Image Selected!! NOW CLICK UPLOAD",
+                                                    Toast.LENGTH_LONG)
                                             .show();
                                     progressBar.setVisibility(View.INVISIBLE);
                                     upload.setEnabled(true);

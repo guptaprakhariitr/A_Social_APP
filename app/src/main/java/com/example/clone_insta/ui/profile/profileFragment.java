@@ -134,6 +134,7 @@ public class profileFragment extends Fragment {
             public void onClick(View v) {
                 initAdapter();
                 Log.i("Tag_in","     imp     "+rowsArrayList.size());
+                recyclerView.setBackgroundResource(android.R.color.transparent);
                 initScrollListener();
             }
         });

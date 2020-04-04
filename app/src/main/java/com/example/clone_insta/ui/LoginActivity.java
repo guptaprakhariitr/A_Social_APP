@@ -120,9 +120,13 @@ public void signUpFunc(View view)
                                 }
                                 else{
                                     Toast.makeText(LoginActivity.this, "Email May Not Be Verified",
+
                                             Toast.LENGTH_SHORT).show();
+                                    mAuth.getCurrentUser();
+                                    mAuth.signOut();
                                     pass.setText("");
                                     email.setText("");
+
                                 }
                             } else {
                                 // If sign in fails, display a message to the user.
